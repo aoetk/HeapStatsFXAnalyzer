@@ -7,6 +7,7 @@ package jp.co.ntt.oss.heapstats.plugin.builtin.threadrecorder;
 
 import java.io.File;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -53,19 +54,19 @@ public class ThreadRecorderController extends PluginController implements Initia
     private ComboBox<ThreadStat> endCombo;
 
     @FXML
-    private TableView<ThreadShowSwitch> threadListView;
+    private TableView<ThreadStatViewModel> threadListView;
 
     @FXML
-    private TableColumn<ThreadShowSwitch, Boolean> showColumn;
+    private TableColumn<ThreadStatViewModel, Boolean> showColumn;
 
     @FXML
-    private TableColumn<ThreadShowSwitch, String> threadNameColumn;
+    private TableColumn<ThreadStatViewModel, String> threadNameColumn;
 
     @FXML
-    private TableView<ThreadStat> timelineView;
+    private TableView<ThreadStatViewModel> timelineView;
 
     @FXML
-    private TableColumn timelineColumn;
+    private TableColumn<ThreadStatViewModel, Long> timelineColumn;
 
     /**
      * Initializes the controller class.
@@ -96,20 +97,23 @@ public class ThreadRecorderController extends PluginController implements Initia
             TaskAdapter<ThreadRecordParseTask> task = new TaskAdapter<>(new ThreadRecordParseTask(recorderFile));
             super.bindTask(task);
             task.setOnSucceeded(evt -> {
-                                         ThreadRecordParseTask parser = task.getTask();
-                                         
-                                         ObservableList<ThreadStat> list = FXCollections.observableArrayList(parser.getThreadStatList());
-                                         startCombo.setItems(list);
-                                         endCombo.setItems(list);
-                                         startCombo.getSelectionModel().selectFirst();
-                                         endCombo.getSelectionModel().selectLast();
-                                         
-                                         Map<Long, String> idMap = parser.getIdMap();
-                                         threadListView.setItems(FXCollections.observableArrayList(idMap.keySet().stream()
-                                                                                                                 .sorted()
-                                                                                                                 .map(k -> new ThreadShowSwitch(k, idMap.get(k)))
-                                                                                                                 .collect(Collectors.toList())));
-                                       });
+                ThreadRecordParseTask parser = task.getTask();
+
+                ObservableList<ThreadStat> list = FXCollections.observableArrayList(parser.getThreadStatList());
+                startCombo.setItems(list);
+                endCombo.setItems(list);
+                startCombo.getSelectionModel().selectFirst();
+                endCombo.getSelectionModel().selectLast();
+
+                Map<Long, List<ThreadStat>> statById = list.stream()
+                        .collect(Collectors.groupingBy(ThreadStat::getId));
+
+                Map<Long, String> idMap = parser.getIdMap();
+                threadListView.setItems(FXCollections.observableArrayList(idMap.keySet().stream()
+                        .sorted()
+                        .map(k -> new ThreadStatViewModel(k, idMap.get(k), statById.get(k)))
+                        .collect(Collectors.toList())));
+            });
             
             Thread parseThread = new Thread(task);
             parseThread.start();

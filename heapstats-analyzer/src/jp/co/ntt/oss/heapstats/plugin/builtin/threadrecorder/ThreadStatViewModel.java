@@ -17,15 +17,18 @@
  */
 package jp.co.ntt.oss.heapstats.plugin.builtin.threadrecorder;
 
+import java.util.List;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import jp.co.ntt.oss.heapstats.container.threadrecord.ThreadStat;
 
 /**
- * This class uses for switch to show Thread Status Data.
+ * Thread Status Data Model for presentation.
  * 
  * @author Yasumasa Suenaga
  */
-public class ThreadShowSwitch {
+public class ThreadStatViewModel {
     
     private final BooleanProperty show;
     
@@ -33,9 +36,12 @@ public class ThreadShowSwitch {
     
     private String name;
 
-    public ThreadShowSwitch(long id, String name) {
+    private final List<ThreadStat> threadStats;
+
+    public ThreadStatViewModel(long id, String name, List<ThreadStat> threadStats) {
         this.id = id;
         this.name = name;
+        this.threadStats = threadStats;
         this.show = new SimpleBooleanProperty(true);
     }
     
@@ -58,5 +64,9 @@ public class ThreadShowSwitch {
     public void setName(String name) {
         this.name = name;
     }
-    
+
+    public List<ThreadStat> getThreadStats() {
+        return threadStats;
+    }
+
 }
