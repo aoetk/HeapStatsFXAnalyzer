@@ -39,27 +39,33 @@ import jp.co.ntt.oss.heapstats.utils.ThreadStatConverter;
  * @author Yasu
  */
 public class ThreadRecorderController extends PluginController implements Initializable {
-    
+
     @FXML
     private Button openBtn;
-    
+
     @FXML
     private TextField fileNameBox;
-    
+
     @FXML
     private ComboBox<ThreadStat> startCombo;
-    
+
     @FXML
     private ComboBox<ThreadStat> endCombo;
-    
+
     @FXML
     private TableView<ThreadShowSwitch> threadListView;
-    
+
     @FXML
     private TableColumn<ThreadShowSwitch, Boolean> showColumn;
-    
+
     @FXML
     private TableColumn<ThreadShowSwitch, String> threadNameColumn;
+
+    @FXML
+    private TableView<ThreadStat> timelineView;
+
+    @FXML
+    private TableColumn timelineColumn;
 
     /**
      * Initializes the controller class.
