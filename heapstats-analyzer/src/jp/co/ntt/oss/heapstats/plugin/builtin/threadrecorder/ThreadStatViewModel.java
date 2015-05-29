@@ -17,6 +17,7 @@
  */
 package jp.co.ntt.oss.heapstats.plugin.builtin.threadrecorder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javafx.beans.property.BooleanProperty;
@@ -36,11 +37,18 @@ public class ThreadStatViewModel {
     
     private String name;
 
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
+
     private final List<ThreadStat> threadStats;
 
-    public ThreadStatViewModel(long id, String name, List<ThreadStat> threadStats) {
+    public ThreadStatViewModel(long id, String name, LocalDateTime startTime, LocalDateTime endTime,
+            List<ThreadStat> threadStats) {
         this.id = id;
         this.name = name;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.threadStats = threadStats;
         this.show = new SimpleBooleanProperty(true);
     }
@@ -63,6 +71,22 @@ public class ThreadStatViewModel {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     public List<ThreadStat> getThreadStats() {

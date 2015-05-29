@@ -111,7 +111,8 @@ public class ThreadRecorderController extends PluginController implements Initia
                 Map<Long, String> idMap = parser.getIdMap();
                 threadListView.setItems(FXCollections.observableArrayList(idMap.keySet().stream()
                         .sorted()
-                        .map(k -> new ThreadStatViewModel(k, idMap.get(k), statById.get(k)))
+                        .map(k -> new ThreadStatViewModel(k, idMap.get(k),
+                                list.get(0).getTime(), list.get(list.size() - 1).getTime(), statById.get(k)))
                         .collect(Collectors.toList())));
             });
             
