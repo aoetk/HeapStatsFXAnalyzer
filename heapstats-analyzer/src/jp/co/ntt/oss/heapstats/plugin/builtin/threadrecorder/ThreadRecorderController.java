@@ -5,12 +5,6 @@
  */
 package jp.co.ntt.oss.heapstats.plugin.builtin.threadrecorder;
 
-import java.io.File;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -18,11 +12,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
@@ -33,6 +23,13 @@ import jp.co.ntt.oss.heapstats.task.ThreadRecordParseTask;
 import jp.co.ntt.oss.heapstats.utils.HeapStatsUtils;
 import jp.co.ntt.oss.heapstats.utils.TaskAdapter;
 import jp.co.ntt.oss.heapstats.utils.ThreadStatConverter;
+
+import java.io.File;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 /**
  * FXML Controller class
@@ -66,7 +63,7 @@ public class ThreadRecorderController extends PluginController implements Initia
     private TableView<ThreadStatViewModel> timelineView;
 
     @FXML
-    private TableColumn<ThreadStatViewModel, Long> timelineColumn;
+    private TableColumn<ThreadStatViewModel, List<ThreadStat>> timelineColumn;
 
     /**
      * Initializes the controller class.
@@ -79,6 +76,8 @@ public class ThreadRecorderController extends PluginController implements Initia
         showColumn.setCellValueFactory(new PropertyValueFactory<>("show"));
         showColumn.setCellFactory(CheckBoxTableCell.forTableColumn(showColumn));
         threadNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        timelineColumn.setCellValueFactory(new PropertyValueFactory<>("threadStats"));
+        timelineColumn.setCellFactory(param -> new TimelineCell());
     }
     
     @FXML
@@ -109,11 +108,14 @@ public class ThreadRecorderController extends PluginController implements Initia
                         .collect(Collectors.groupingBy(ThreadStat::getId));
 
                 Map<Long, String> idMap = parser.getIdMap();
-                threadListView.setItems(FXCollections.observableArrayList(idMap.keySet().stream()
-                        .sorted()
-                        .map(k -> new ThreadStatViewModel(k, idMap.get(k),
-                                list.get(0).getTime(), list.get(list.size() - 1).getTime(), statById.get(k)))
-                        .collect(Collectors.toList())));
+                ObservableList<ThreadStatViewModel> threadStats = FXCollections.observableArrayList(
+                        idMap.keySet().stream()
+                                .sorted()
+                                .map(k -> new ThreadStatViewModel(k, idMap.get(k),
+                                        list.get(0).getTime(), list.get(list.size() - 1).getTime(), statById.get(k)))
+                                .collect(Collectors.toList()));
+                threadListView.setItems(threadStats);
+                timelineView.setItems(threadStats);
             });
             
             Thread parseThread = new Thread(task);

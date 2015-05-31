@@ -17,12 +17,14 @@
  */
 package jp.co.ntt.oss.heapstats.plugin.builtin.threadrecorder;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import jp.co.ntt.oss.heapstats.container.threadrecord.ThreadStat;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Thread Status Data Model for presentation.
@@ -41,7 +43,7 @@ public class ThreadStatViewModel {
 
     private LocalDateTime endTime;
 
-    private final List<ThreadStat> threadStats;
+    private ReadOnlyObjectWrapper<List<ThreadStat>> threadStats;
 
     public ThreadStatViewModel(long id, String name, LocalDateTime startTime, LocalDateTime endTime,
             List<ThreadStat> threadStats) {
@@ -49,7 +51,7 @@ public class ThreadStatViewModel {
         this.name = name;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.threadStats = threadStats;
+        this.threadStats = new ReadOnlyObjectWrapper<>(threadStats);
         this.show = new SimpleBooleanProperty(true);
     }
     
@@ -90,7 +92,11 @@ public class ThreadStatViewModel {
     }
 
     public List<ThreadStat> getThreadStats() {
-        return threadStats;
+        return threadStats.get();
+    }
+
+    public ReadOnlyObjectProperty<List<ThreadStat>> threadStatsProperty() {
+        return threadStats.getReadOnlyProperty();
     }
 
 }
