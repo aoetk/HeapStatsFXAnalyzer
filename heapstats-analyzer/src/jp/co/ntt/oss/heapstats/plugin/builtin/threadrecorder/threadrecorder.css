@@ -3,11 +3,11 @@
 }
 
 .rect-threadstart {
-    -fx-fill: #dcdcdc;
+    -fx-fill: #ff8c00;
 }
 
 .rect-threadend {
-    -fx-fill: #808080;
+    -fx-fill: transparent;
 }
 
 .rect-monitorwait {
@@ -15,7 +15,7 @@
 }
 
 .rect-monitorwaited {
-    -fx-fill: #ba55d3;
+    -fx-fill: #ff8c00;
 }
 
 .rect-monitorcontendedenter {
@@ -23,7 +23,7 @@
 }
 
 .rect-monitorcontendedentered {
-    -fx-fill: #3cb371;
+    -fx-fill: #ff8c00;
 }
 
 .rect-threadsleepstart {
@@ -31,7 +31,7 @@
 }
 
 .rect-threadsleepend {
-    -fx-fill: #b0c4de;
+    -fx-fill: #ff8c00;
 }
 
 .rect-park {
@@ -39,7 +39,7 @@
 }
 
 .rect-unpark {
-    -fx-fill: #800080;
+    -fx-fill: #ff8c00;
 }
 
 .rect-filewritestart {
@@ -47,7 +47,7 @@
 }
 
 .rect-filewriteend {
-    -fx-fill: #daa520;
+    -fx-fill: #ff8c00;
 }
 
 .rect-filereadstart {
@@ -55,7 +55,7 @@
 }
 
 .rect-filereadend {
-    -fx-fill: #008000;
+    -fx-fill: #ff8c00;
 }
 
 .rect-socketwritestart {
@@ -63,7 +63,7 @@
 }
 
 .rect-socketwriteend {
-    -fx-fill: #ff6347;
+    -fx-fill: #ff8c00;
 }
 
 .rect-socketreadstart {
@@ -71,6 +71,5 @@
 }
 
 .rect-socketreadend {
-    -fx-fill: #6b8e23;
+    -fx-fill: #ff8c00;
 }
-

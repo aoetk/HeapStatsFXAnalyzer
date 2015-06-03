@@ -17,9 +17,9 @@ import java.util.List;
  */
 public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat>> {
 
-    private static final double LENGTH_PER_MILLS = 0.4;
+    public static final double LENGTH_PER_MILLS = 1;
 
-    private static final double RECT_HEIGHT = 16;
+    private static final double RECT_HEIGHT = 15;
 
     private static final String CSS_CLASS_PREFIX = "rect-";
 
@@ -34,7 +34,7 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
     @Override
     protected void updateItem(List<ThreadStat> item, boolean empty) {
         super.updateItem(item, empty);
-        if (empty || item == null || item.size() == 0) {
+        if (empty || item == null || item.isEmpty()) {
             setText(null);
             setGraphic(null);
         } else {
@@ -47,9 +47,13 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
             ThreadStat.ThreadEvent prevEvent = item.get(0).getEvent();
             List<Rectangle> rects = new ArrayList<>();
             for (int i = 0; i < item.size(); i++) {
-                ThreadStat threadStat = item.get(0);
+                ThreadStat threadStat = item.get(i);
                 LocalDateTime currentTime = threadStat.getTime();
-                rects.add(createThreadRect(prevTime, currentTime, prevEvent));
+                if (i == 0 && threadStat.getEvent() == ThreadStat.ThreadEvent.ThreadStart) {
+                    rects.add(createThreadRect(prevTime, currentTime, ThreadStat.ThreadEvent.Unused));
+                } else {
+                    rects.add(createThreadRect(prevTime, currentTime, prevEvent));
+                }
 
                 prevTime = currentTime;
                 prevEvent = threadStat.getEvent();

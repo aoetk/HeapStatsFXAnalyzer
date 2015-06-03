@@ -26,6 +26,8 @@ import jp.co.ntt.oss.heapstats.utils.ThreadStatConverter;
 
 import java.io.File;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -108,12 +110,14 @@ public class ThreadRecorderController extends PluginController implements Initia
                         .collect(Collectors.groupingBy(ThreadStat::getId));
 
                 Map<Long, String> idMap = parser.getIdMap();
-                ObservableList<ThreadStatViewModel> threadStats = FXCollections.observableArrayList(
-                        idMap.keySet().stream()
+                final LocalDateTime startTime = list.get(0).getTime();
+                final LocalDateTime endTime = list.get(list.size() - 1).getTime();
+                ObservableList<ThreadStatViewModel> threadStats = FXCollections.observableArrayList(idMap.keySet().stream()
                                 .sorted()
-                                .map(k -> new ThreadStatViewModel(k, idMap.get(k),
-                                        list.get(0).getTime(), list.get(list.size() - 1).getTime(), statById.get(k)))
+                                .map(k -> new ThreadStatViewModel(k, idMap.get(k), startTime, endTime, statById.get(k)))
                                 .collect(Collectors.toList()));
+                long timeDiff = startTime.until(endTime, ChronoUnit.MILLIS);
+                timelineColumn.setPrefWidth(timeDiff * TimelineCell.LENGTH_PER_MILLS);
                 threadListView.setItems(threadStats);
                 timelineView.setItems(threadStats);
             });
