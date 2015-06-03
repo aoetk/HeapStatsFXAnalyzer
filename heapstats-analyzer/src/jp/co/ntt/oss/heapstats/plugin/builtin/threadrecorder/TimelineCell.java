@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat>> {
 
-    private static final double LENGTH_PER_MILLS = 0.04;
+    private static final double LENGTH_PER_MILLS = 0.4;
 
     private static final double RECT_HEIGHT = 16;
 
@@ -27,7 +27,7 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
 
     public TimelineCell() {
         container = new HBox(0);
-        container.setAlignment(Pos.CENTER);
+        container.setAlignment(Pos.CENTER_LEFT);
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     }
 
