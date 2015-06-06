@@ -31,7 +31,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
 
 /**
  * FXML Controller class
@@ -69,6 +73,8 @@ public class ThreadRecorderController extends PluginController implements Initia
     @FXML
     private TableColumn<ThreadStatViewModel, List<ThreadStat>> timelineColumn;
 
+    private boolean boundScrollBar = false;
+
     /**
      * Initializes the controller class.
      */
@@ -86,6 +92,10 @@ public class ThreadRecorderController extends PluginController implements Initia
     
     @FXML
     private void onOpenBtnClick(ActionEvent event){
+        if (boundScrollBar != true) {
+            bindScroll();
+            boundScrollBar = true;
+        }
         FileChooser dialog = new FileChooser();
         dialog.setTitle("Choose HeapStats Thread Recorder file");
         dialog.setInitialDirectory(new File(HeapStatsUtils.getDefaultDirectory()));
@@ -154,5 +164,24 @@ public class ThreadRecorderController extends PluginController implements Initia
     public Runnable getOnCloseRequest() {
         return null;
     }
-    
+
+    private void bindScroll() {
+        ScrollBar leftScrollBar = getVerticalScrollBar(threadListView);
+        ScrollBar rightScrollBar = getVerticalScrollBar(timelineView);
+        leftScrollBar.valueProperty().bindBidirectional(rightScrollBar.valueProperty());
+    }
+
+    private ScrollBar getVerticalScrollBar(TableView<?> tableView) {
+        Set<Node> nodes = tableView.lookupAll(".scroll-bar");
+        for (Node node : nodes) {
+            if (node instanceof ScrollBar) {
+                ScrollBar scrollBar = (ScrollBar) node;
+                if (scrollBar.getOrientation() == Orientation.VERTICAL) {
+                    return scrollBar;
+                }
+            }
+        }
+        throw new IllegalStateException("Not found ScrollBar.");
+    }
+
 }
