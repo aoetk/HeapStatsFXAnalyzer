@@ -40,6 +40,8 @@ import java.util.stream.Collectors;
  */
 public class ThreadRecorderController extends PluginController implements Initializable {
 
+    private static final int TIMELINE_PADDING = 8;
+
     @FXML
     private Button openBtn;
 
@@ -117,7 +119,7 @@ public class ThreadRecorderController extends PluginController implements Initia
                                 .map(k -> new ThreadStatViewModel(k, idMap.get(k), startTime, endTime, statById.get(k)))
                                 .collect(Collectors.toList()));
                 long timeDiff = startTime.until(endTime, ChronoUnit.MILLIS);
-                timelineColumn.setPrefWidth(timeDiff * TimelineCell.LENGTH_PER_MILLS);
+                timelineColumn.setPrefWidth(timeDiff * TimelineCell.LENGTH_PER_MILLS + TIMELINE_PADDING);
                 threadListView.setItems(threadStats);
                 timelineView.setItems(threadStats);
             });

@@ -19,16 +19,17 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
 
     public static final double LENGTH_PER_MILLS = 1;
 
-    private static final double RECT_HEIGHT = 15;
+    private static final double RECT_HEIGHT = 16;
 
     private static final String CSS_CLASS_PREFIX = "rect-";
 
-    private HBox container;
+    private final HBox container;
 
     public TimelineCell() {
         container = new HBox(0);
         container.setAlignment(Pos.CENTER_LEFT);
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        setAlignment(Pos.CENTER_LEFT);
     }
 
     @Override
