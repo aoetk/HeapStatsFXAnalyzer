@@ -43,7 +43,7 @@ public class ThreadStatViewModel {
 
     private LocalDateTime endTime;
 
-    private ReadOnlyObjectWrapper<List<ThreadStat>> threadStats;
+    private final ReadOnlyObjectWrapper<List<ThreadStat>> threadStats;
 
     public ThreadStatViewModel(long id, String name, LocalDateTime startTime, LocalDateTime endTime,
             List<ThreadStat> threadStats) {
