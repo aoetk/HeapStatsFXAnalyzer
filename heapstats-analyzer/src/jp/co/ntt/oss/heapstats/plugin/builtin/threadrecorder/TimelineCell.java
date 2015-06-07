@@ -36,36 +36,53 @@ public class TimelineCell extends TableCell<ThreadStatViewModel, List<ThreadStat
     protected void updateItem(List<ThreadStat> item, boolean empty) {
         super.updateItem(item, empty);
         if (empty || item == null || item.isEmpty()) {
-            setText(null);
-            setGraphic(null);
+            updateToEmptyCell();
         } else {
-            container.getChildren().clear();
-
             ThreadStatViewModel viewModel = getTableView().getItems().get(getIndex());
             LocalDateTime startTime = viewModel.getStartTime();
             LocalDateTime endTime = viewModel.getEndTime();
-            LocalDateTime prevTime = startTime;
-            ThreadStat.ThreadEvent prevEvent = item.get(0).getEvent();
-            List<Rectangle> rects = new ArrayList<>();
-            for (int i = 0; i < item.size(); i++) {
-                ThreadStat threadStat = item.get(i);
-                LocalDateTime currentTime = threadStat.getTime();
-                if (i == 0 && threadStat.getEvent() == ThreadStat.ThreadEvent.ThreadStart) {
-                    rects.add(createThreadRect(prevTime, currentTime, ThreadStat.ThreadEvent.Unused));
-                } else {
-                    rects.add(createThreadRect(prevTime, currentTime, prevEvent));
-                }
-
-                prevTime = currentTime;
-                prevEvent = threadStat.getEvent();
-
-                if (i == item.size() - 1 && threadStat.getEvent() != ThreadStat.ThreadEvent.ThreadEnd) {
-                    rects.add(createThreadRect(prevTime, endTime, prevEvent));
-                }
+            if (startTime.isAfter(endTime)) {
+                updateToEmptyCell();
+            } else {
+                drawTimeline(startTime, item, endTime);
             }
-            container.getChildren().addAll(rects);
-            setGraphic(container);
         }
+    }
+
+    private void drawTimeline(LocalDateTime startTime, List<ThreadStat> item, LocalDateTime endTime) {
+        container.getChildren().clear();
+
+        LocalDateTime prevTime = startTime;
+        ThreadStat.ThreadEvent prevEvent = item.get(0).getEvent();
+        List<Rectangle> rects = new ArrayList<>();
+        for (int i = 0; i < item.size(); i++) {
+            ThreadStat threadStat = item.get(i);
+            LocalDateTime currentTime = threadStat.getTime();
+            boolean end = currentTime.isAfter(endTime);
+            currentTime = end ? endTime : currentTime;
+            if (i == 0 && threadStat.getEvent() == ThreadStat.ThreadEvent.ThreadStart) {
+                rects.add(createThreadRect(prevTime, currentTime, ThreadStat.ThreadEvent.Unused));
+            } else {
+                rects.add(createThreadRect(prevTime, currentTime, prevEvent));
+            }
+            if (end) {
+                break;
+            }
+            
+            prevTime = currentTime;
+            prevEvent = threadStat.getEvent();
+            
+            if (i == item.size() - 1 && threadStat.getEvent() != ThreadStat.ThreadEvent.ThreadEnd) {
+                rects.add(createThreadRect(prevTime, endTime, prevEvent));
+            }
+        }
+        container.getChildren().addAll(rects);
+        setGraphic(container);
+    }
+
+    private void updateToEmptyCell() {
+        setText(null);
+        setGraphic(null);
     }
 
     private Rectangle createThreadRect(LocalDateTime startTime, LocalDateTime endTime,

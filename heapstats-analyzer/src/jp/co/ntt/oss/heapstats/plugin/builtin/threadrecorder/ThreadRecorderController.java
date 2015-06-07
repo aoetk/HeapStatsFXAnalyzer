@@ -46,6 +46,8 @@ public class ThreadRecorderController extends PluginController implements Initia
 
     private static final int TIMELINE_PADDING = 8;
 
+    private static final double DEFAULT_COLUMN_WIDTH = 525.0;
+
     @FXML
     private Button openBtn;
 
@@ -81,7 +83,13 @@ public class ThreadRecorderController extends PluginController implements Initia
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         startCombo.setConverter(new ThreadStatConverter());
+        startCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            updateTime(newValue.getTime(), true);
+        });
         endCombo.setConverter(new ThreadStatConverter());
+        endCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            updateTime(newValue.getTime(), false);
+        });
         
         showColumn.setCellValueFactory(new PropertyValueFactory<>("show"));
         showColumn.setCellFactory(CheckBoxTableCell.forTableColumn(showColumn));
@@ -128,8 +136,7 @@ public class ThreadRecorderController extends PluginController implements Initia
                                 .sorted()
                                 .map(k -> new ThreadStatViewModel(k, idMap.get(k), startTime, endTime, statById.get(k)))
                                 .collect(Collectors.toList()));
-                long timeDiff = startTime.until(endTime, ChronoUnit.MILLIS);
-                timelineColumn.setPrefWidth(timeDiff * TimelineCell.LENGTH_PER_MILLS + TIMELINE_PADDING);
+                adjustColumnWidth(startTime, endTime);
                 threadListView.setItems(threadStats);
                 timelineView.setItems(threadStats);
             });
@@ -182,6 +189,35 @@ public class ThreadRecorderController extends PluginController implements Initia
             }
         }
         throw new IllegalStateException("Not found ScrollBar.");
+    }
+
+    private void updateTime(LocalDateTime time, boolean start) {
+        if (timelineView.getItems().size() > 0) {
+            List<ThreadStatViewModel> updatedModels = timelineView.getItems().stream()
+                    .map(model -> {
+                        if (start) {
+                            model.setStartTime(time);
+                        } else {
+                            model.setEndTime(time);
+                        }
+                        return model;
+                    }).collect(Collectors.toList());
+            ObservableList<ThreadStatViewModel> newViewModels = FXCollections.observableArrayList(updatedModels);
+            threadListView.getItems().clear();
+            threadListView.setItems(newViewModels);
+            timelineView.getItems().clear();
+            timelineView.setItems(newViewModels);
+            LocalDateTime startTime = newViewModels.get(0).getStartTime();
+            LocalDateTime endTime = newViewModels.get(0).getEndTime();
+            adjustColumnWidth(startTime, endTime);
+        }
+    }
+
+    private void adjustColumnWidth(LocalDateTime startTime, LocalDateTime endTime) {
+        long timeDiff = startTime.until(endTime, ChronoUnit.MILLIS);
+        double newWidth = timeDiff * TimelineCell.LENGTH_PER_MILLS + TIMELINE_PADDING;
+        newWidth = (newWidth < DEFAULT_COLUMN_WIDTH) ? DEFAULT_COLUMN_WIDTH : newWidth;
+        timelineColumn.setPrefWidth(newWidth);
     }
 
 }
