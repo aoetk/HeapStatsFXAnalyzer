@@ -45,6 +45,7 @@ import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.StackedAreaChart;
+import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -266,7 +267,7 @@ public class SnapShotController extends PluginController implements Initializabl
                                                 super.updateItem(item, empty);
                                                 String style = Optional.ofNullable((DiffData)getTableRow().getItem())
                                                                        .filter(d -> d.isRanked())
-                                                                       .map(d -> String.format("-fx-background-color: #%06x;", d.getClassName().hashCode() & 0xFFFFFF))
+                                                                       .map(d -> "-fx-background-color: " + ChartColorManager.getNextColor(d.getClassName()))
                                                                        .orElse("-fx-background-color: transparent;");
                                                 setStyle(style);
                                               }
@@ -286,7 +287,7 @@ public class SnapShotController extends PluginController implements Initializabl
                                                    super.updateItem(item, empty);
                                                    String style = Optional.ofNullable((ObjectData)getTableRow().getItem())
                                                                           .filter(o -> topNChart.getData().stream().anyMatch(d -> d.getName().equals(o.getName())))
-                                                                          .map(o -> String.format("-fx-background-color: #%06x;", o.getName().hashCode() & 0xFFFFFF))
+                                                                          .map(o -> "-fx-background-color: " + ChartColorManager.getNextColor(o.getName()))
                                                                           .orElse("-fx-background-color: transparent;");
                                                    setStyle(style);
                                                  }
@@ -350,18 +351,15 @@ public class SnapShotController extends PluginController implements Initializabl
         
     }
     
-    private void setTopNChartColor(){
-        topNChart.getData().stream()
-                           .forEach(s -> {
-                                            String colorHexCode = String.format("#%06x", s.getName().hashCode() & 0xFFFFFF);
-                                            
-                                            s.getNode().lookup(".chart-series-area-line").setStyle(String.format("-fx-stroke: %s;", colorHexCode));
-                                            s.getNode().lookup(".chart-series-area-fill").setStyle(String.format("-fx-fill: %s;", colorHexCode));
+    private void setTopNChartColor(XYChart.Series<String, Long> series){
+        String color = ChartColorManager.getNextColor(series.getName());
 
-                                            s.getData().stream()
-                                                       .map(d -> d.getNode().lookup(".chart-area-symbol"))
-                                                       .forEach(n -> n.setStyle(String.format("-fx-background-color: %s, white;", colorHexCode)));
-                                         });
+        series.getNode().lookup(".chart-series-area-line").setStyle(String.format("-fx-stroke: %s;", color));
+        series.getNode().lookup(".chart-series-area-fill").setStyle(String.format("-fx-fill: %s;", color));
+
+        series.getData().stream()
+                        .map(d -> d.getNode().lookup(".chart-area-symbol"))
+                        .forEach(n -> n.setStyle(String.format("-fx-background-color: %s, white;", color)));
     }
     
     /**
@@ -406,7 +404,17 @@ public class SnapShotController extends PluginController implements Initializabl
         
         lastDiffTable.getItems().addAll(diff.getLastDiffList());
         snapShotTimeCombo.getSelectionModel().selectLast();
-        setTopNChartColor();
+        topNChart.getData().forEach(this::setTopNChartColor);
+        
+        long maxVal = topNChart.getData().stream()
+                               .flatMap(s -> s.dataProperty().get().stream())
+                               .collect(Collectors.groupingBy(d -> d.getXValue(), Collectors.summingLong(d -> d.getYValue())))
+                               .values()
+                               .stream()
+                               .mapToLong(Long::longValue)
+                               .max()
+                               .getAsLong();
+        ((ValueAxis)topNChart.getYAxis()).setUpperBound(maxVal * 1.05d);
     }
     
     /**
@@ -545,7 +553,7 @@ public class SnapShotController extends PluginController implements Initializabl
                                                                              .map(o -> new PieChart.Data(o.getName(), o.getTotalSize()))
                                                                              .collect(Collectors.toList()));
         usagePieChart.getData().stream()
-                               .forEach(d -> d.getNode().setStyle(String.format("-fx-pie-color: #%06X;", d.getName().hashCode() & 0xFFFFFF)));
+                               .forEach(d -> d.getNode().setStyle("-fx-pie-color: " + ChartColorManager.getNextColor(d.getName())));
         
         objDataTable.setItems(FXCollections.observableArrayList(
                 header.getSnapShot(HeapStatsUtils.getReplaceClassName()).values().stream().collect(Collectors.toList())));
@@ -630,7 +638,9 @@ public class SnapShotController extends PluginController implements Initializabl
             excludeFilterList.stream()
                              .map(f -> (Filters)JAXB.unmarshal(f, Filters.class))
                              .filter(f -> f != null)
-                             .forEach(f -> excludeTable.getItems().addAll(f.getFilter()));
+                             .flatMap(f -> f.getFilter().stream()
+                                                        .map(e -> new BindingFilter(e)))
+                             .forEach(f -> excludeTable.getItems().addAll(f));
         }
         
     }

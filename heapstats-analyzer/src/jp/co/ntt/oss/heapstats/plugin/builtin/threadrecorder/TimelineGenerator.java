@@ -28,6 +28,8 @@ public class TimelineGenerator {
 
     private static final String CSS_CLASS_PREFIX = "rect-";
 
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS");
+    
     public static enum ThreadEvent{
         Unused,
         Run,
@@ -45,7 +47,7 @@ public class TimelineGenerator {
     
     private final DoubleProperty prefWidth;
     
-    private double range;
+    private long range;
     
     private double scale;
     
@@ -65,13 +67,13 @@ public class TimelineGenerator {
         scale = width / (double)range;
         
         // Try to micro sec
-        if(scale > 0.0d){
+        if(scale > 1.0d){
             unit = ChronoUnit.MICROS;
             range = start.until(end, unit);
             scale = width / (double)range;
             
             // Try to nano sec
-            if(scale > 0.0d){
+            if(scale > 1.0d){
                 unit = ChronoUnit.NANOS;
                 range = start.until(end, unit);
                 scale = width / (double)range;
@@ -182,8 +184,17 @@ public class TimelineGenerator {
         
         for(int Cnt = startIndex; Cnt < threadStatList.size(); Cnt++){
             ThreadStat threadStat = threadStatList.get(Cnt);
+            long additionalData;
             
-            rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, prevAdditionalData));
+            if((prevEvent == ThreadEvent.FileRead) || (prevEvent == ThreadEvent.FileWrite) ||
+               (prevEvent == ThreadEvent.SocketRead) || (prevEvent == ThreadEvent.SocketWrite)){
+                additionalData = threadStat.getAdditionalData();
+            }
+            else{
+                additionalData = prevAdditionalData;
+            }
+            
+            rects.add(createThreadRect(prevTime, threadStat.getTime(), prevEvent, additionalData));
             
             prevTime = threadStat.getTime();
             prevAdditionalData = threadStat.getAdditionalData();
@@ -200,27 +211,29 @@ public class TimelineGenerator {
         String styleClass = CSS_CLASS_PREFIX + event.name().toLowerCase();
         rectangle.getStyleClass().add(styleClass);
         
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS");
-        String caption = startTime.format(formatter) + " - " + endTime.format(formatter) + ": " + event.toString();
-        switch(event){
-            case MonitorWait:
-            case ThreadSleep:
-            case Park:
-                if(additionalData > 0){
-                    caption += " (" + Long.toString(additionalData) + " ms)";
-                }
-                break;
-                
-            case FileWrite:
-            case FileRead:
-            case SocketWrite:
-            case SocketRead:
-                caption += " (" + Long.toString(additionalData) + " bytes)";
-                break;
-        }
-        
-        if((event != ThreadEvent.Unused) && (width > 0.0d)){
-            Tooltip.install(rectangle, new Tooltip(caption));
+        if(width > 1.0d){
+            String caption = startTime.format(formatter) + " - " + endTime.format(formatter) + ": " + event.toString();
+            switch(event){
+                case MonitorWait:
+                case ThreadSleep:
+                case Park:
+                    if(additionalData > 0){
+                        caption += " (" + Long.toString(additionalData) + " ms)";
+                    }
+                    break;
+
+                case FileWrite:
+                case FileRead:
+                case SocketWrite:
+                case SocketRead:
+                    caption += " (" + Long.toString(additionalData) + " bytes)";
+                    break;
+            }
+
+            if((event != ThreadEvent.Unused)){
+                Tooltip.install(rectangle, new Tooltip(caption));
+            }
+
         }
         
         return rectangle;

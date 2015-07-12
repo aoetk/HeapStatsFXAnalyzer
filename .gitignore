@@ -7,6 +7,10 @@
 /heapstats-analyzer/nbproject/private/
 /heapstats-analyzer/build/
 /heapstats-analyzer/dist/
+/heapstats-analyzer/build
+/heapstats-cli/nbproject/private/
+/heapstats-cli/build/
+/heapstats-cli/dist/
 /heapstats-analyzer/contrib/RefTreePlugin/nbproject/private
 /heapstats-analyzer/contrib/RefTreePlugin/build
 /heapstats-analyzer/contrib/RefTreePlugin/dist
@@ -18,3 +22,7 @@ out/
 .idea_modules/
 atlassian-ide-plugin.xml
 com_crashlytics_export_strings.xml
+/heapstats-mbean/java/heapstats-mbean/nbproject/private/
+/heapstats-mbean/java/build/
+/heapstats-mbean/java/dist/
+/heapstats-mbean/java/nbproject/private/

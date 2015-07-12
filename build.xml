@@ -21,6 +21,10 @@
 
 <project name="heapstats" default="all" basedir=".">
 
+  <target name="mbean">
+    <ant dir="heapstats-mbean/java" target="jar" useNativeBasedir="true"/>
+  </target>
+
   <target name="core">
     <ant dir="heapstats-core" target="jar" useNativeBasedir="true"/>
   </target>
@@ -29,11 +33,24 @@
     <ant dir="heapstats-analyzer" target="jfx-build" useNativeBasedir="true"/>
   </target>
 
-  <target name="clean">
-    <ant dir="heapstats-analyzer" target="clean" useNativeBasedir="true"/>
-    <ant dir="heapstats-core" target="clean" useNativeBasedir="true"/>
+  <target name="cli">
+    <ant dir="heapstats-cli" target="jar" useNativeBasedir="true"/>
   </target>
 
-  <target name="all" depends="core,analyzer"/>
+  <target name="clean">
+    <ant dir="heapstats-mbean/java" target="clean" useNativeBasedir="true"/>
+    <ant dir="heapstats-cli" target="clean" useNativeBasedir="true"/>
+    <ant dir="heapstats-analyzer" target="clean" useNativeBasedir="true"/>
+    <ant dir="heapstats-core" target="clean" useNativeBasedir="true"/>
+    <ant dir="heapstats-analyzer/contrib/RefTreePlugin"
+                                      target="clean" useNativeBasedir="true"/>
+  </target>
+
+  <target name="contrib">
+    <ant dir="heapstats-analyzer/contrib/RefTreePlugin"
+                                      target="jar" useNativeBasedir="true"/>
+  </target>
+
+  <target name="all" depends="mbean,core,analyzer,cli"/>
 
 </project>
